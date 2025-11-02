@@ -1,4 +1,5 @@
 'use client';
+import { createClient } from '@/lib/supabase';
 import {
   Collapsible,
   CollapsibleContent,
@@ -63,6 +64,7 @@ export default function AppSidebar() {
   const { isOpen } = useMediaQuery();
   const user = null; // Placeholder since we're not using Supabase auth helpers
   const router = useRouter();
+  const supabase = createClient();
   const handleSwitchTenant = (_tenantId: string) => {
     // Tenant switching functionality would be implemented here
   };

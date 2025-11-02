@@ -76,7 +76,7 @@ export class PythonRunner {
           } catch (parseError) {
             resolve({
               success: true,
-              data: stdout.trim(),
+              data: stdout.trim() as T,
               executionTime
             });
           }
@@ -148,7 +148,7 @@ export class PythonRunner {
           } catch (parseError) {
             resolve({
               success: true,
-              data: stdout.trim(),
+              data: stdout.trim() as T,
               executionTime
             });
           }

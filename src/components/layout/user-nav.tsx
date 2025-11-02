@@ -12,9 +12,9 @@ import {
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { useRouter } from 'next/navigation';
 export function UserNav() {
-  const user = null; // Placeholder since we're not using Supabase auth helpers
+  const user: any = null; // Placeholder since we're not using Supabase auth helpers
   const router = useRouter();
-  if (user) {
+  if (user && user.fullName && user.emailAddresses?.[0]?.emailAddress) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

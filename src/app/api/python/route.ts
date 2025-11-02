@@ -35,33 +35,33 @@ export async function POST(request: NextRequest) {
         );
         break;
 
-      case 'run_script':
-        console.log('Running script:', script, 'with args:', data?.args || []);
-        if (script === 'orders.py') {
-          result = await pythonRunner.runScript(script, data?.args || []);
-        } else {
-          result = await pythonRunner.runScript(script, data?.args || []);
-        }
-        console.log('Script result:', result);
-        break;
+      // case 'run_script':
+      //   console.log('Running script:', script, 'with args:', data?.args || []);
+      //   if (script === 'orders.py') {
+      //     result = await pythonRunner.runScript(script, data?.args || []);
+      //   } else {
+      //     result = await pythonRunner.runScript(script, data?.args || []);
+      //   }
+      //   console.log('Script result:', result);
+      //   break;
 
-      case 'cancel_order':
-        console.log('Canceling order:', data.orderId);
-        try {
-          result = await pythonRunner.runScript('cancel_order.py', [
-            '--orderId',
-            data.orderId
-          ]);
-          console.log('Cancel result:', result);
-        } catch (error) {
-          console.error('Cancel order error:', error);
-          result = {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-            executionTime: 0
-          };
-        }
-        break;
+      // case 'cancel_order':
+      //   console.log('Canceling order:', data.orderId);
+      //   try {
+      //     result = await pythonRunner.runScript('cancel_order.py', [
+      //       '--orderId',
+      //       data.orderId
+      //     ]);
+      //     console.log('Cancel result:', result);
+      //   } catch (error) {
+      //     console.error('Cancel order error:', error);
+      //     result = {
+      //       success: false,
+      //       error: error instanceof Error ? error.message : 'Unknown error',
+      //       executionTime: 0
+      //     };
+      //   }
+      //   break;
 
       case 'run_code':
         result = await businessLogicService.runCustomAnalysis(code, data);

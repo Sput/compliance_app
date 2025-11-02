@@ -65,6 +65,14 @@ export const navItems: NavItem[] = [
     shortcut: ['k', 'k'],
     isActive: false,
     items: [] // No child items
+  },
+  {
+    title: 'Evidence',
+    url: '/dashboard/evidence',
+    icon: 'post',
+    shortcut: ['e', 'v'],
+    isActive: false,
+    items: []
   }
 ];
 
