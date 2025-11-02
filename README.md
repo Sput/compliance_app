@@ -9,7 +9,7 @@ Minimal MVP per plan: upload evidence → OCR parse (system, date) → classify 
 - Python service (server-side only)
   - `SUPABASE_URL`: Supabase project URL.
   - `SUPABASE_SERVICE_KEY`: Supabase service-role key (never expose to browser).
-  - `PYTHON_OCR_PROVIDER` (optional): placeholder to select OCR provider.
+  - `PYTHON_OCR_PROVIDER` : not using OCR yet, will probably just use OpenAI, we shall see
 
 Keep service keys server-side only. The Next.js app uses only anon key.
 
