@@ -1,4 +1,4 @@
-##Evidence Classification Pipeline
+## Evidence Classification Pipeline
 
 A lightweight, production-oriented system for turning unstructured compliance artifacts into structured, reviewable evidence. Designed for SOC 2, PCI DSS, ISO 27001, HIPAA, GDPR, and similar frameworks.
 
@@ -28,7 +28,7 @@ This produces an auditable, repeatable classification pipeline suited for real c
 
 ⸻
 
-##Agentic Architecture
+## Agentic Architecture
 
 The application implements a hierarchical agentic system, designed to keep reasoning modular, observable, and bounded. This takes inspiration from supervisor–worker designs common in agentic platforms (LangChain, “Agents v2,” CrewAI, Kazuki-style orchestration, etc.).
 
@@ -36,7 +36,7 @@ Agents are specialized, narrow, and constrained via JSON schemas, preventing dri
 
 ⸻
 
-##Agent Roles
+## Agent Roles
 
 1. Supervisor Agent
 
@@ -98,7 +98,7 @@ This is the core semantic intelligence of the pipeline.
 
 ⸻
 
-##Agent Orchestration Flow
+## Agent Orchestration Flow
 
 The Supervisor enforces a strict execution order:
 
@@ -117,7 +117,7 @@ Each agent’s inputs/outputs can be logged for compliance traceability.
 
 ⸻
 
-##Architecture
+## Architecture
 
 Frontend (Next.js + Supabase)
 	•	Drag-and-drop uploader
@@ -137,7 +137,7 @@ All JSON outputs adhere to strict schemas, ensuring reliability.
 
 ⸻
 
-##Data Model
+## Data Model
 
 Table	Purpose
 audits	Audit metadata
