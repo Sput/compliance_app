@@ -12,7 +12,7 @@ export interface PythonScriptResult<T = any> {
 export class PythonRunner {
   private pythonPath: string;
 
-  constructor(pythonPath: string = '/Users/paul/miniforge3/bin/python') {
+  constructor(pythonPath: string = process.env.PYTHON_PATH || 'python3') {
     this.pythonPath = pythonPath;
   }
 

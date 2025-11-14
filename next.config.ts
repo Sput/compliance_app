@@ -12,7 +12,8 @@ const baseConfig: NextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist']
+  transpilePackages: ['geist'],
+  output: 'standalone'
 };
 
 let configWithPlugins = baseConfig;
