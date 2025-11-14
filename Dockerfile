@@ -29,7 +29,7 @@ ENV NODE_ENV=production
 # Minimal system deps in runtime for Python
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    python3 python3-pip ca-certificates curl libvips \
+    python3 python3-pip python3-venv ca-certificates curl libvips \
   && rm -rf /var/lib/apt/lists/*
 
 # App runtime files (Next standalone output)
@@ -38,14 +38,17 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
 # Python requirements and scripts
+# Create and use a Python virtual environment (PEP 668 compliant)
+RUN python3 -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+ENV PYTHON_PATH=/venv/bin/python
 COPY --from=builder /app/requirements.txt ./requirements.txt
 COPY --from=builder /app/python-scripts ./python-scripts
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Runtime env
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV PYTHON_PATH=python3
 
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
