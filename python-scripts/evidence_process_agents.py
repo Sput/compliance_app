@@ -191,6 +191,43 @@ def _iso_date(d: date) -> str:
 
 tool = _import_tool()
 
+# Marker signalling for first @tool call (for streaming UIs)
+_FIRST_TOOL_SIGNAL_SENT = False
+_EMITTED_TOOL_NAMES: Optional[set] = None
+
+def _maybe_signal_first_tool_call() -> None:
+    """Emit a single stdout marker when any @tool is first invoked.
+
+    Guarded by env var EVIDENCE_STREAM_MARKERS to avoid corrupting non-stream JSON outputs.
+    """
+    global _FIRST_TOOL_SIGNAL_SENT
+    if _FIRST_TOOL_SIGNAL_SENT:
+        return
+    if os.getenv("EVIDENCE_STREAM_MARKERS"):
+        try:
+            print("AGENT_TOOL_CALLED", flush=True)
+        except Exception:
+            pass
+    _FIRST_TOOL_SIGNAL_SENT = True
+
+def _emit_tool_name(name: str) -> None:
+    """Emit a single stdout line per tool name when markers are enabled.
+
+    Prints: TOOL_CALLED:<name>
+    """
+    if not os.getenv("EVIDENCE_STREAM_MARKERS"):
+        return
+    global _EMITTED_TOOL_NAMES
+    if _EMITTED_TOOL_NAMES is None:
+        _EMITTED_TOOL_NAMES = set()
+    if name in _EMITTED_TOOL_NAMES:
+        return
+    try:
+        print(f"TOOL_CALLED:{name}", flush=True)
+    except Exception:
+        pass
+    _EMITTED_TOOL_NAMES.add(name)
+
 
 @tool("extract_dates")
 def extract_dates(text: str) -> List[str]:
@@ -199,6 +236,7 @@ def extract_dates(text: str) -> List[str]:
     Heuristics only; may return multiple candidates. Prefer dates labeled like
     "Report Date", "Effective", or near words like "dated". The agent can choose.
     """
+    _maybe_signal_first_tool_call()
     write_debug("extract_dates_input", {"text_head": text[:1000] if text else "", "length": len(text or "")})
     if not text:
         return []
@@ -241,6 +279,7 @@ def check_date_range(date_str: str, start: str, end: str) -> Dict[str, Any]:
 
     Returns a dict: {"within": bool, "parsed_date": "YYYY-MM-DD"|None, "reason": str}
     """
+    _maybe_signal_first_tool_call()
     parsed = _parse_any_date(date_str)
     if not parsed:
         result = {"within": False, "parsed_date": None, "reason": "unrecognized date format"}
@@ -380,6 +419,7 @@ def get_control_specs() -> List[Dict[str, str]]:
     Fetches from Supabase (REST) if configured; falls back to a local JSON file db/control_specs.json.
     Results are cached in-memory for 15 minutes to avoid repeated DB hits.
     """
+    _maybe_signal_first_tool_call()
     return _get_control_specs_cached()
 
 
@@ -462,6 +502,7 @@ def _llm_extract_date_core(text: str) -> Dict[str, Any]:
 @tool("llm_extract_date")
 def llm_extract_date(text: str) -> Dict[str, Any]:
     """LLM-based date extraction. Returns {date, quote, reason}."""
+    _maybe_signal_first_tool_call()
     write_debug("llm_extract_date_input", {"text_len": len(text or "")})
     out = _llm_extract_date_core(text)
     write_debug("llm_extract_date_output", out)
@@ -771,6 +812,8 @@ def date_guard_tool(text: str, date_start: str, date_end: str) -> str:
 
     Returns strict JSON: {status: PASS|FAIL, parsed_date: YYYY-MM-DD|null, reason: string}
     """
+    _maybe_signal_first_tool_call()
+    _emit_tool_name("date_guard")
     result = date_guard_pipeline(text=text, date_start=date_start, date_end=date_end)
     return json.dumps(result)
 
@@ -778,6 +821,8 @@ def date_guard_tool(text: str, date_start: str, date_end: str) -> str:
 @tool("action_describer")
 def action_describer_tool(text: str) -> str:
     """Run the Action Describer sub-agent and return JSON: {actions_summary}."""
+    _maybe_signal_first_tool_call()
+    _emit_tool_name("action_describer")
     out = run_action_describer(text=text)
     # Ensure compact JSON string
     if isinstance(out, dict):
@@ -788,6 +833,8 @@ def action_describer_tool(text: str) -> str:
 @tool("control_assigner")
 def control_assigner_tool(text: str) -> str:
     """Run the Control Assigner sub-agent on evidence text and return JSON: {control_id, id, rationale}."""
+    _maybe_signal_first_tool_call()
+    _emit_tool_name("control_assigner")
     out = run_control_assigner(text=text)
     try:
         obj = out if isinstance(out, dict) else json.loads(str(out))
@@ -803,14 +850,17 @@ def build_supervisor_agent(llm=None):
 
     Tools available:
       - date_guard(text, date_start, date_end)
+      - action_describer(text)
       - control_assigner(text)
 
     Contract: The supervisor must follow this exact sequence:
       1) Call date_guard first. If status=FAIL, return final JSON with failure.
-      2) Then call control_assigner with text.
-      3) Return final JSON:
+      2) If PASS, call action_describer with text.
+      3) Then call control_assigner with text.
+      4) Return final JSON:
          {
            "date_check": {status, parsed_date, reason},
+           "actions_summary": "...",
            "assigned_control_id": "..." | null,
            "rationale": "..."
          }
@@ -843,6 +893,9 @@ def run_supervisor(text: str, date_start: str, date_end: str, llm=None) -> Dict[
     Returns strict JSON with keys: date_check, actions_summary, assigned_control_id, rationale
     """
     write_debug("supervisor_orchestrator_input", {"text_len": len(text or ""), "date_start": date_start, "date_end": date_end})
+    # Emit progress markers aligned with the conceptual tool stages
+    _maybe_signal_first_tool_call()
+    _emit_tool_name("date_guard")
 
     # Step 1: Date Guard pipeline
     date_check = date_guard_pipeline(text=text, date_start=date_start, date_end=date_end)
@@ -857,6 +910,7 @@ def run_supervisor(text: str, date_start: str, date_end: str, llm=None) -> Dict[
         return result
 
     # Step 2: Bypass Action Describer — derive a concise snippet from the input text
+    _emit_tool_name("action_describer")
     def _make_actions_snippet(s: str, max_chars: int = 600) -> str:
         body = re.sub(r"\s+", " ", s or "").strip()
         if len(body) <= max_chars:
@@ -871,6 +925,7 @@ def run_supervisor(text: str, date_start: str, date_end: str, llm=None) -> Dict[
     write_debug("actions_summary_bypass", {"len": len(actions_summary), "preview": actions_summary[:300]})
 
     # Step 3: Control Assigner using evidence text only
+    _emit_tool_name("control_assigner")
     assign_out = run_control_assigner(text=text, llm=llm)
     try:
         assign_obj = assign_out if isinstance(assign_out, dict) else json.loads(str(assign_out))

@@ -9,5 +9,5 @@ export default async function Page() {
   if (!session) {
     return redirect('/auth/sign-in');
   }
-  return redirect('/dashboard/overview');
+  return redirect('/dashboard');
 }

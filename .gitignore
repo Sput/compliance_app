@@ -73,3 +73,10 @@ env/
 # Personal/notes
 user.md
 
+# Debug outputs
+python-scripts/tmp_outputs/
+
+
+
+
+
