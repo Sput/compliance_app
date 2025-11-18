@@ -20,6 +20,14 @@ export const navItems: NavItem[] = [
     shortcut: ['e', 'v'],
     isActive: false,
     items: []
+  },
+  {
+    title: 'Vision',
+    url: '/dashboard/vision',
+    icon: 'media',
+    shortcut: ['v', 's'],
+    isActive: false,
+    items: []
   }
 ];
 

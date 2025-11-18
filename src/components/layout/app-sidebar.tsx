@@ -84,7 +84,8 @@ export default function AppSidebar() {
           <SidebarMenu>
             {navItems.map((item) => {
               const Icon = item.icon ? Icons[item.icon] : Icons.logo;
-              const showIcon = item.url === '/dashboard/evidence';
+              // Show an icon whenever the nav item specifies one
+              const showIcon = Boolean(item.icon && Icons[item.icon]);
               return item?.items && item?.items?.length > 0 ? (
                 <Collapsible
                   key={item.title}
