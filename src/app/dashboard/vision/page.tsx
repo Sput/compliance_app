@@ -332,7 +332,7 @@ export default function EvidenceUploadPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4">
       <div className="text-2xl font-bold whitespace-pre-line">
-        {`Upload a txt file with a date and text about a compliance security control. An example would be a txt file with the following text in it: 
+        {`Upload a file with a date and text about a compliance security control. An example would be a jpg file with the following text in it: 
 
 "October 22 2025 
 We have a policy that requires passwords to be changed every 70 days."`}
