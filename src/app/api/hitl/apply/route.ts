@@ -8,6 +8,30 @@ function isUuid(x: string): boolean {
   return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(x);
 }
 
+// Lifted to top-level to avoid ES5 strict-mode restriction on function declarations inside blocks
+async function resolveControlIdViaService(code: string): Promise<string | null> {
+  try {
+    const restBase = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const serviceKey = process.env.SUPABASE_SERVICE_KEY || '';
+    if (!restBase || !serviceKey) return null;
+    const url = new URL(restBase.replace(/\/$/, '') + '/rest/v1/controls');
+    url.searchParams.set('select', 'id');
+    url.searchParams.set('control_id', `eq.${code}`);
+    const resp = await fetch(url.toString(), {
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+      },
+    });
+    if (!resp.ok) return null;
+    const arr = await resp.json();
+    if (Array.isArray(arr) && arr[0]?.id) return String(arr[0].id);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as Body;
@@ -34,28 +58,7 @@ export async function POST(req: NextRequest) {
     console.log('[HITL-DB] apply: decided_output', decided?.decided_output ?? decided);
 
     const supabase = await createServerClient();
-    const restBase = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const serviceKey = process.env.SUPABASE_SERVICE_KEY || '';
-    async function resolveControlIdViaService(code: string): Promise<string | null> {
-      try {
-        if (!restBase || !serviceKey) return null;
-        const url = new URL(restBase.replace(/\/$/, '') + '/rest/v1/controls');
-        url.searchParams.set('select', 'id');
-        url.searchParams.set('control_id', `eq.${code}`);
-        const resp = await fetch(url.toString(), {
-          headers: {
-            apikey: serviceKey,
-            Authorization: `Bearer ${serviceKey}`,
-          },
-        });
-        if (!resp.ok) return null;
-        const arr = await resp.json();
-        if (Array.isArray(arr) && arr[0]?.id) return String(arr[0].id);
-        return null;
-      } catch {
-        return null;
-      }
-    }
+    // restBase/serviceKey accessed inside resolveControlIdViaService at top-level
 
     // Persist step
     const { error: stepErr } = await supabase
