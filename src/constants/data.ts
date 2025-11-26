@@ -20,6 +20,22 @@ export const navItems: NavItem[] = [
     shortcut: ['v', 's'],
     isActive: false,
     items: []
+  },
+  {
+    title: 'HITL',
+    url: '/dashboard/hitl',
+    icon: 'post',
+    shortcut: ['h', 'i'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Progress',
+    url: '/dashboard/progress',
+    icon: 'dashboard',
+    shortcut: ['p', 'r'],
+    isActive: false,
+    items: []
   }
 ];
 
