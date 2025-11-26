@@ -525,7 +525,8 @@ export default function HitlPage() {
           <div className="text-xs text-muted-foreground">Proposed Date: {modelOutput?.evidence_date ?? '—'} (candidates {modelOutput?.candidates?.length ?? 0})</div>
           <Label>Evidence Date</Label>
           <Input
-            value={evidenceDate}
+            type="date"
+            value={evidenceDate || ''}
             onChange={(e) => setEvidenceDate(e.target.value)}
             onFocus={() => setIsEditingEvidenceDate(true)}
             onBlur={() => setIsEditingEvidenceDate(false)}
@@ -580,24 +581,6 @@ export default function HitlPage() {
                   <div className="text-xs text-muted-foreground">conf {c.confidence ?? '—'} · {c.rationale ?? ''}</div>
                 </div>
                 <input type="radio" name="cand" value={String(c.id)} checked={selectionId === String(c.id)} onChange={(e)=>setSelectionId(e.target.value)} />
-              </label>
-            ))}
-            {candidates.length === 0 && <div className="text-sm text-muted-foreground">No candidates</div>}
-          </div>
-        </div>
-      );
-    }
-    if (currentStage === 'select_control') {
-      const candidates = (decided?.candidates ?? modelOutput?.candidates ?? []) as any[];
-      return (
-        <div className="space-y-3">
-          <Label>Choose Control</Label>
-          <div className="space-y-2">
-            {candidates.map((c, i) => (
-              <label key={i} className="flex items-center gap-2 text-sm">
-                <input type="radio" name="control" value={String(c.id)} checked={selectionId === String(c.id)} onChange={(e)=>setSelectionId(e.target.value)} />
-                <span className="font-medium">{c.label}</span>
-                <span className="text-muted-foreground">({c.id})</span>
               </label>
             ))}
             {candidates.length === 0 && <div className="text-sm text-muted-foreground">No candidates</div>}
@@ -681,6 +664,12 @@ export default function HitlPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4">
+      <div className="text-2xl font-bold whitespace-pre-line">
+        {`Upload a file with a date and text about a compliance security control. An example would be a jpg file with the following text in it: 
+
+"October 22 2025 
+We have a policy that requires passwords to be changed every 70 days."`}
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Human-in-the-Loop</CardTitle>

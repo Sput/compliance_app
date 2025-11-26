@@ -55,9 +55,6 @@ async function runMock<T = any>(subcommand: string, input: any): Promise<T> {
       const truncated = text.length > 1000;
       return { stage, model_output: { text: truncated ? text.slice(0, 1000) : text, source: payload.source || 'mock', truncated, length: Math.min(text.length, 1000) }, meta: { elapsed_ms: 1 } } as T;
     }
-    if (stage === 'extract_date') {
-      return { stage, model_output: { evidence_date: '2025-10-22', candidates: ['2025-10-22'], confidence: 0.9, rationale: 'mock' }, meta: { elapsed_ms: 1 } } as T;
-    }
     if (stage === 'date') {
       const text: string = payload?.text || '';
       const ev = '2025-10-22';
