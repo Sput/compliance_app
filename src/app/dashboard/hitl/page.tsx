@@ -31,7 +31,7 @@ function nextStage(s: Stage): Stage | null {
   return STAGES[i + 1];
 }
 
-function stageLabel(s: Stage): string {
+function stageLabel(s: string): string {
   switch (s) {
     case 'ingest_text':
       return 'Ingest Text Agent';
